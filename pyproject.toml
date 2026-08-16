@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "ecommerce"
+version = "0.1.0"
+description = ""
+authors = ["rabernardino <rabernardino@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.13.*"
+pandas = "^3.0.5"
+dbt-postgres = "^1.11.0"
+sqlalchemy = "^2.0.51"
+psycopg2-binary = "^2.9.12"
+python-dotenv = "^1.2.2"
+
+
+[tool.poetry.group.dev.dependencies]
+taskipy = "^1.14.1"
+
+[tool.taskipy.tasks]
+run = "poetry run"
+
+dbt_run = "export $(grep -v '^#' .env | xargs) && dbt"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

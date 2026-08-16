@@ -1,0 +1,39 @@
+
+
+models:
+  - name: bronze_customers
+    description: Raw data customers info.
+
+    data_tests:
+      - minimum_rows_counts:
+          arguments:
+            row_count: 1
+        
+    columns:
+      - name: customer_id
+        description: Customer id that relates to orders table
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_unique_id
+        description: Customer unique identifier
+        data_tests:
+          - not_null
+
+  - name: bronze_orders_payments
+    description: Raw payments data associates with each order
+
+    columns:
+      - name: payment_type
+        description: Type of payment method choiced by the user
+        data_tests:
+          - accepted_values:
+              values: ['not_defined','boleto','debit_card','voucher','credit_card']
+
+      - name: payment_value
+        description: How much the user pays for the order (Products and Freight)
+        data_tests:
+          - not_null
+      
+  - name: bronze_orders_items

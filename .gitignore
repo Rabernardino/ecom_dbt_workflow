@@ -1,0 +1,23 @@
+# ==========================================
+.env
+profiles.yml
+
+# ==========================================
+data/
+*.csv
+*.xlsx
+*.parquet
+
+# ==========================================
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.vscode/
+
+# ==========================================
+transform/dbt_modules/
+transform/logs/
+transform/target/
+transform/dbt_packages/
+transform/.user.yml
