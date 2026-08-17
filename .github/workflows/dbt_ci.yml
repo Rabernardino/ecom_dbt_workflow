@@ -48,6 +48,10 @@ jobs:
                "${{ secrets.SUPABASE_URL }}/storage/v1/object/public/dbt-artifacts/manifest.json"
         continue-on-error: true
 
+      - name: Instalando pacotes no dbt
+        working-directory: ./transform
+        run: poetry run dbt deps
+
       - name: Executar dbt build (Slim CI)
         working-directory: ./transform
         run: |
