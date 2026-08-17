@@ -1,0 +1,69 @@
+name: dbt Slim CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  dbt-ci:
+    runs-on: ubuntu-latest
+    
+    env:
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASS: ${{ secrets.DB_PASS }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Instalar Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Instalar dependências do projeto
+        run: poetry install --no-root
+
+      - name: Criar diretório para o estado do dbt
+        working-directory: ./transform
+        run: mkdir -p target
+
+      - name: Baixar manifest.json de Produção (Supabase Storage)
+        working-directory: ./transform
+        run: |
+          curl -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+               -o target/manifest.json \
+               "${{ secrets.SUPABASE_URL }}/storage/v1/object/public/dbt-artifacts/manifest.json"
+        continue-on-error: true
+
+      - name: Instalando pacotes no dbt
+        working-directory: ./transform
+        run: poetry run dbt deps
+
+      - name: Executar dbt build (Slim CI)
+        working-directory: ./transform
+        run: |
+          poetry run dbt build --select state:modified+ --defer --state ./target --target ci --profiles-dir .
+      
+      - name: Limpar schema temporário do PR
+        if: always()
+        env:
+          PGPASSWORD: ${{ secrets.DB_PASS }}
+        run: |
+          psql -h "${{ secrets.DB_HOST }}" \
+               -p "${{ secrets.DB_PORT }}" \
+               -U "${{ secrets.DB_USER }}" \
+               -d "postgres" \
+               -c "DROP SCHEMA IF EXISTS pr_${{ env.PR_NUMBER }} CASCADE;"

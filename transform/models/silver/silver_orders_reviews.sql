@@ -14,10 +14,12 @@ WITH bronze_orders_reviews AS (
         *
     FROM
         {{ ref( 'bronze_orders_reviews' ) }}
+    
     WHERE
+        1=1
         {% if is_incremental() %}
 
-            review_creation_date >= (SELECT MAX(review_creation_date) FROM {{ this }})
+        AND review_creation_date >= (SELECT MAX(review_creation_date) FROM {{ this }})
 
         {% endif %}
     
