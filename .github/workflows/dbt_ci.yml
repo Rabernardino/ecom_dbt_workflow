@@ -51,7 +51,7 @@ jobs:
       - name: Executar dbt build (Slim CI)
         working-directory: ./transform
         run: |
-          poetry run dbt build --select state:modified+ --defer --state ./target --target ci
+          poetry run dbt build --select state:modified+ --defer --state ./target --target ci --profiles-dir .
       
       - name: Limpar schema temporário do PR
         if: always()
@@ -61,5 +61,5 @@ jobs:
           psql -h "${{ secrets.DB_HOST }}" \
                -p "${{ secrets.DB_PORT }}" \
                -U "${{ secrets.DB_USER }}" \
-               -d "airbnb" \
+               -d "postgres" \
                -c "DROP SCHEMA IF EXISTS pr_${{ env.PR_NUMBER }} CASCADE;"
