@@ -20,7 +20,7 @@ silver_products AS (
     SELECT
         *
     FROM
-        {{ ref('silver_producst') }}
+        {{ ref('silver_products') }}
 )
 
 select
